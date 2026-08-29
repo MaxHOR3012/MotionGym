@@ -1,0 +1,243 @@
+<title>Fitness-Rad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --ink:#07090f;
+    --panel:#0d131e;
+    --line:#1e2a3d;
+    --line-soft:#161f2e;
+    --text:#e4ecf8;
+    --muted:#8795ab;
+    --blue:#2f6bff;
+    --blue-bright:#4aa8ff;
+    --cyan:#7de3ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;
+    background:
+      radial-gradient(900px 500px at 50% -10%, rgba(47,107,255,.28), transparent 60%),
+      var(--ink);
+    color:var(--text);
+    font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+    display:flex;flex-direction:column;align-items:center;
+    padding:28px 20px 40px;gap:18px;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);
+    text-align:center;
+  }
+  h1{
+    font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;
+    font-size:clamp(38px,7vw,66px);line-height:.92;margin:0;
+    text-transform:uppercase;text-align:center;letter-spacing:-.005em;
+  }
+  h1 span{
+    background:linear-gradient(100deg,var(--blue-bright),var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .stage{position:relative;width:min(78vmin,540px);aspect-ratio:1;display:grid;place-items:center}
+  .glow{
+    position:absolute;inset:-6%;border-radius:50%;
+    background:radial-gradient(circle,rgba(47,107,255,.35),transparent 66%);
+    filter:blur(24px);pointer-events:none;
+  }
+  canvas{
+    width:100%;height:100%;border-radius:50%;
+    box-shadow:0 0 0 6px #0a1120, 0 0 0 7px var(--line), 0 24px 60px rgba(0,0,0,.6);
+    transition:transform 4.2s cubic-bezier(.14,.72,.11,1);
+    transform:rotate(0deg);
+  }
+  .hub{
+    position:absolute;width:16%;aspect-ratio:1;border-radius:50%;
+    background:#0a1120;border:1px solid var(--line);
+    display:grid;place-items:center;
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:clamp(11px,2.2vmin,16px);letter-spacing:.12em;color:var(--cyan);
+    text-transform:uppercase;pointer-events:none;
+  }
+  .pointer{
+    position:absolute;top:-2px;left:50%;transform:translateX(-50%);
+    width:0;height:0;
+    border-left:15px solid transparent;border-right:15px solid transparent;
+    border-top:30px solid var(--cyan);
+    filter:drop-shadow(0 3px 8px rgba(125,227,255,.5));
+    z-index:2;
+  }
+
+  button{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:clamp(24px,4.4vw,34px);text-transform:uppercase;letter-spacing:.09em;
+    color:#fff;cursor:pointer;
+    padding:15px 58px;border:1px solid rgba(125,227,255,.45);
+    background:linear-gradient(180deg,var(--blue),#1b47c4);
+    box-shadow:0 10px 30px rgba(47,107,255,.35);
+    transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 36px rgba(47,107,255,.45)}
+  button:active:not(:disabled){transform:translateY(1px)}
+  button:disabled{filter:grayscale(.6) brightness(.65);cursor:not-allowed;box-shadow:none}
+  button:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+
+  .result{
+    min-height:104px;width:min(100%,620px);
+    border:1px solid var(--line);background:var(--panel);
+    padding:18px 24px;text-align:center;
+    display:flex;flex-direction:column;justify-content:center;gap:6px;
+  }
+  .result .label{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  }
+  .result .task{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:clamp(30px,6.6vw,54px);line-height:1.02;text-transform:uppercase;
+    color:#fff;text-wrap:balance;
+  }
+  .result.hit{border-color:rgba(125,227,255,.5);box-shadow:0 0 0 1px rgba(125,227,255,.18) inset}
+  .result.hit .task{color:var(--cyan)}
+
+  details{width:min(100%,620px);border-top:1px solid var(--line-soft);padding-top:14px}
+  summary{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);cursor:pointer;
+  }
+  summary:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  ol{
+    margin:12px 0 0;padding-left:22px;color:#c3cfe2;
+    columns:2;column-gap:28px;font-size:15px;
+  }
+  li{margin-bottom:5px;break-inside:avoid}
+  @media (max-width:560px){ol{columns:1}}
+  @media (prefers-reduced-motion:reduce){
+    canvas{transition-duration:.4s}
+    button{transition:none}
+  }
+</style>
+
+<div class="eyebrow">Sportstunde &middot; Aufgabe ziehen</div>
+<h1>Fitness-<span>Rad</span></h1>
+
+<div class="stage">
+  <div class="glow"></div>
+  <div class="pointer"></div>
+  <canvas id="wheel" width="1000" height="1000" aria-label="Glücksrad mit zehn Fitnessaufgaben"></canvas>
+  <div class="hub">Los</div>
+</div>
+
+<button id="spin" type="button">Drehen</button>
+
+<div class="result" id="result" role="status" aria-live="polite">
+  <div class="label">Deine Aufgabe</div>
+  <div class="task" id="task">Drück auf Drehen</div>
+</div>
+
+<details>
+  <summary>Alle zehn Aufgaben</summary>
+  <ol id="list"></ol>
+</details>
+
+<script>
+  const TASKS = [
+    "10 Liegestütze",
+    "15 Sit-ups",
+    "10 Burpees",
+    "20 Hampelmänner",
+    "30 Sek. Plank",
+    "15 Kniebeugen",
+    "20 Ausfallschritte",
+    "30 Sek. Hochsprünge",
+    "15 Crunches",
+    "30 Sek. Wall Sit"
+  ];
+
+  const list = document.getElementById("list");
+  TASKS.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    list.appendChild(li);
+  });
+
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const N = TASKS.length;
+  const SEG = (Math.PI * 2) / N;
+  const R = canvas.width / 2;
+
+  // Abwechselnde Blautöne, dunkel bis leuchtend
+  const palette = ["#12203a", "#1b3f7d", "#12203a", "#2f6bff", "#12203a", "#1b3f7d", "#12203a", "#2f6bff", "#12203a", "#1b3f7d"];
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.translate(R,R);
+    for (let i = 0; i < N; i++){
+      const start = i * SEG - Math.PI / 2 - SEG / 2;
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.arc(0,0,R-4,start,start+SEG);
+      ctx.closePath();
+      ctx.fillStyle = palette[i];
+      ctx.fill();
+      ctx.strokeStyle = "rgba(125,227,255,.22)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Text
+      ctx.save();
+      ctx.rotate(start + SEG/2);
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = '600 48px "Barlow Condensed", Arial Narrow, sans-serif';
+      const words = TASKS[i].split(" ");
+      const line1 = words[0];
+      const line2 = words.slice(1).join(" ");
+      ctx.fillText(line1, R - 60, -26);
+      ctx.font = '600 40px "Barlow Condensed", Arial Narrow, sans-serif';
+      ctx.fillStyle = "#d5e6ff";
+      ctx.fillText(line2, R - 60, 22);
+      ctx.restore();
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(draw);
+  }
+  draw();
+
+  const btn = document.getElementById("spin");
+  const result = document.getElementById("result");
+  const taskEl = document.getElementById("task");
+  let rotation = 0;
+  let spinning = false;
+
+  btn.addEventListener("click", () => {
+    if (spinning) return;
+    spinning = true;
+    btn.disabled = true;
+    result.classList.remove("hit");
+    taskEl.textContent = "…";
+
+    const pick = Math.floor(Math.random() * N);
+    const turns = 5 + Math.floor(Math.random() * 3);
+    // Zielwinkel: gezogenes Segment landet oben unter dem Zeiger
+    const desired = ((-pick * (360 / N)) % 360 + 360) % 360;
+    const current = ((rotation % 360) + 360) % 360;
+    rotation += turns * 360 + ((desired - current) + 360) % 360;
+    canvas.style.transform = "rotate(" + rotation + "deg)";
+
+    const wait = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 450 : 4300;
+    setTimeout(() => {
+      taskEl.textContent = TASKS[pick];
+      result.classList.add("hit");
+      btn.disabled = false;
+      btn.textContent = "Nochmal";
+      spinning = false;
+    }, wait);
+  });
+</script>

@@ -1,0 +1,509 @@
+<title>Motion Gym Herborn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --ink:#07090f;
+    --panel:#0d131e;
+    --panel-2:#111a29;
+    --line:#1e2a3d;
+    --line-soft:#161f2e;
+    --text:#e4ecf8;
+    --muted:#8795ab;
+    --blue:#2f6bff;
+    --blue-bright:#4aa8ff;
+    --cyan:#7de3ff;
+    --warn:#ffb45c;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text);
+    font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--cyan);text-decoration:none}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(900px 420px at 78% -10%, rgba(47,107,255,.34), transparent 62%),
+      radial-gradient(600px 300px at 10% 110%, rgba(125,227,255,.12), transparent 65%),
+      var(--ink);
+  }
+  .hero-inner{padding:64px 0 52px;display:flex;flex-direction:column;gap:26px}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--cyan);
+  }
+  h1{
+    font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+    font-weight:700;
+    font-size:clamp(56px,12vw,132px);
+    line-height:.88;
+    letter-spacing:-.01em;
+    margin:0;
+    text-wrap:balance;
+    text-transform:uppercase;
+  }
+  h1 .glow{
+    background:linear-gradient(100deg,var(--blue-bright),var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{max-width:60ch;font-size:20px;color:#c3cfe2;margin:0}
+  .tags{display:flex;flex-wrap:wrap;gap:8px}
+  .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;
+    text-transform:uppercase;color:#bcd2ff;
+    border:1px solid var(--line);background:rgba(47,107,255,.10);
+    padding:6px 11px;
+  }
+
+  /* ---------- Stat band ---------- */
+  .statband{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  .stats{display:grid;grid-template-columns:repeat(4,1fr)}
+  .stat{padding:22px 24px 22px 0;border-left:1px solid var(--line-soft);padding-left:24px}
+  .stat:first-child{border-left:0;padding-left:0}
+  .stat b{
+    display:block;
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:38px;line-height:1;color:#fff;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat span{
+    display:block;margin-top:6px;
+    font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---------- Index ---------- */
+  .index{padding:44px 0 8px}
+  .index h2{margin:0 0 18px}
+  .index ol{
+    list-style:none;margin:0;padding:0;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0 32px;
+    counter-reset:idx;
+  }
+  .index li{border-bottom:1px solid var(--line-soft)}
+  .index a{
+    display:flex;align-items:baseline;gap:14px;
+    padding:11px 2px;color:var(--text);
+  }
+  .index a:hover{color:var(--cyan)}
+  .index a::before{
+    counter-increment:idx;content:counter(idx,decimal-leading-zero);
+    font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--blue-bright);
+  }
+
+  /* ---------- Sections ---------- */
+  section{padding:52px 0;border-top:1px solid var(--line-soft)}
+  section:first-of-type{border-top:0}
+  h2{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:clamp(30px,4.4vw,42px);line-height:1.05;
+    text-transform:uppercase;letter-spacing:.005em;
+    margin:0 0 16px;text-wrap:balance;
+  }
+  h3{
+    font-family:"IBM Plex Mono",monospace;font-weight:500;
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--cyan);margin:0 0 10px;
+  }
+  p{max-width:68ch;margin:0 0 14px}
+  .muted{color:var(--muted)}
+
+  .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    padding:20px 22px;
+  }
+  .card p:last-child{margin-bottom:0}
+  .card ul{margin:0;padding-left:18px}
+  .card li{margin-bottom:6px}
+  .card li:last-child{margin-bottom:0}
+
+  .swot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .swot .card{border-top:3px solid var(--blue)}
+  .swot .card.neg{border-top-color:var(--warn)}
+
+  /* ---------- Finance table ---------- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+  table{border-collapse:collapse;width:100%;min-width:560px}
+  th,td{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    background:var(--panel-2);
+  }
+  td.num{
+    font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+    white-space:nowrap;color:#fff;
+  }
+  tr:last-child td{border-bottom:0}
+  tfoot td{background:var(--panel-2);font-weight:600;border-top:1px solid var(--line)}
+  .bar{height:5px;background:linear-gradient(90deg,var(--blue),var(--cyan));margin-top:7px}
+
+  /* ---------- Preise ---------- */
+  .plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .plan{background:var(--panel);border:1px solid var(--line);padding:24px}
+  .plan.premium{
+    border-color:rgba(74,168,255,.55);
+    background:linear-gradient(180deg,rgba(47,107,255,.16),var(--panel) 60%);
+  }
+  .plan .price{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:64px;
+    line-height:.9;color:#fff;font-variant-numeric:tabular-nums;
+  }
+  .plan .price small{font-size:18px;color:var(--muted);font-family:"Source Sans 3",sans-serif;font-weight:400}
+  .plan h4{margin:0 0 8px;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:500}
+  .plan ul{margin:14px 0 0;padding-left:18px;color:#c3cfe2}
+  .plan li{margin-bottom:5px}
+
+  /* ---------- Team ---------- */
+  .team{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .member{background:var(--panel);border:1px solid var(--line);padding:16px 18px}
+  .member b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;color:#fff;line-height:1.15}
+  .member span{display:block;margin-top:4px;font-size:15px;color:var(--muted)}
+
+  /* ---------- Timeline ---------- */
+  .timeline{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+  .timeline li{position:relative;padding:0 0 26px 26px}
+  .timeline li:last-child{padding-bottom:0}
+  .timeline li::before{
+    content:"";position:absolute;left:-4px;top:9px;width:7px;height:7px;
+    background:var(--cyan);
+  }
+  .timeline b{
+    display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--blue-bright);
+  }
+
+  footer{
+    border-top:1px solid var(--line);padding:28px 0 46px;
+    color:var(--muted);font-size:14px;
+  }
+
+  @media (max-width:760px){
+    body{font-size:16px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat{border-left:0;border-top:1px solid var(--line-soft)}
+    .stat:nth-child(-n+2){border-top:0}
+    .stat:nth-child(even){border-left:1px solid var(--line-soft)}
+    .index ol,.cols,.swot,.plans{grid-template-columns:1fr}
+    .team{grid-template-columns:1fr}
+    .hero-inner{padding:46px 0 38px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div class="eyebrow">Businessplan &middot; Herborn &middot; Schülerprojekt</div>
+    <h1>Motion<br><span class="glow">Gym</span></h1>
+    <p class="lede">Ein 24/7-Fitnessstudio auf dem ehemaligen Toom-Gelände in Herborn — mit modernen Geräten, Spa-Bereich und Kursen. Gegründet von fünf Schülern, die die Mängel der bestehenden Studios selbst erlebt haben.</p>
+    <div class="tags">
+      <span class="tag">24/7 geöffnet</span>
+      <span class="tag">Spa &amp; Wellness</span>
+      <span class="tag">Schülertarife</span>
+      <span class="tag">Rechtsform GmbH</span>
+    </div>
+  </div>
+</header>
+
+<div class="statband">
+  <div class="wrap stats">
+    <div class="stat"><b>485.000 €</b><span>Kapitalbedarf</span></div>
+    <div class="stat"><b>29 / 49 €</b><span>Beitrag pro Monat</span></div>
+    <div class="stat"><b>300–500</b><span>Mitglieder im 1. Jahr</span></div>
+    <div class="stat"><b>5</b><span>Gründer</span></div>
+  </div>
+</div>
+
+<div class="wrap index">
+  <h2>Inhalt</h2>
+  <ol>
+    <li><a href="#idee">Geschäftsidee</a></li>
+    <li><a href="#standort">Standort</a></li>
+    <li><a href="#markt">Markt &amp; Wettbewerb</a></li>
+    <li><a href="#zielgruppe">Zielgruppe</a></li>
+    <li><a href="#swot">SWOT-Analyse</a></li>
+    <li><a href="#organisation">Organisation</a></li>
+    <li><a href="#team">Gründerteam</a></li>
+    <li><a href="#marketing">Marketing</a></li>
+    <li><a href="#preise">Preise</a></li>
+    <li><a href="#finanzierung">Finanzierung</a></li>
+    <li><a href="#zukunft">Zukunft</a></li>
+    <li><a href="#recht">Recht &amp; Sicherheit</a></li>
+  </ol>
+</div>
+
+<main class="wrap">
+
+  <section id="idee">
+    <h2>Geschäftsidee</h2>
+    <p>Alle fünf Gründer trainieren selbst seit Jahren — und stoßen überall auf dieselben Probleme: kaputte Spinte, defekte oder fehlende Geräte, zu kurze Öffnungszeiten und eine Atmosphäre, in der man nicht bleiben möchte.</p>
+    <p>Motion Gym setzt genau dort an: hochwertige Maschinen, funktionierende Ausstattung und ein Studio, das rund um die Uhr offen ist. Ein Angebot von Sportlern für Sportler, gebaut aus den eigenen Ärgernissen heraus.</p>
+  </section>
+
+  <section id="standort">
+    <h2>Standort</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Ehemaliges Toom-Gelände</h3>
+        <p>Große Fläche, bekannte Lage, gut erreichbar mit Auto, Rad und zu Fuß. Genug Platz für Trainingsfläche, Spa, Umkleiden, Duschen und Aufenthaltsbereich.</p>
+      </div>
+      <div class="card">
+        <h3>Warum diese Lage funktioniert</h3>
+        <ul>
+          <li>Direkt neben dem Johanneum Gymnasium</li>
+          <li>Angrenzende Wohngebiete</li>
+          <li>Parkplätze der Stadt — Nutzung bereits abgeklärt</li>
+          <li>Platz für Trainingsbereich <em>und</em> Wellness</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="markt">
+    <h2>Markt &amp; Wettbewerb</h2>
+    <p>In Herborn gibt es bereits zwei Studios, dazu Anbieter in Sinn, Wetzlar und Dillenburg. Der Markt ist erschlossen — aber die Kundschaft ist zu großen Teilen unzufrieden, und genau diese Mängel sind der Ansatzpunkt.</p>
+    <div class="cols">
+      <div class="card">
+        <h3>Wer sonst am Markt ist</h3>
+        <ul>
+          <li>Große Ketten: günstiger Beitrag, viel Marketing, lange Öffnungszeiten</li>
+          <li>Inhabergeführte Studios: persönliche Betreuung, familiär, wenig Reichweite</li>
+          <li>Spezialisten: EMS, Reha-Sport, Yoga- und Crossfit-Boutiquen</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Preisniveau der Region</h3>
+        <p>Von rund <strong>20 €</strong> bei Discount-Anbietern bis über <strong>80 €</strong> im Premium-Segment. Sauna, Getränke-Flatrates und Betreuung treiben den Preis.</p>
+        <p class="muted">Motion Gym positioniert sich mit 29 € und 49 € bewusst in der Mitte.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="zielgruppe">
+    <h2>Zielgruppe</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Primär — Schüler &amp; Jugendliche</h3>
+        <p>Direkt nebenan gelegen, mit eigenen Schülertarifen. Durch die 24/7-Öffnung ist Training vor und nach der Schule möglich.</p>
+      </div>
+      <div class="card">
+        <h3>Sekundär — Junge Erwachsene</h3>
+        <p>Angesprochen über moderne Geräte und flexible Zeiten, langfristig ans Studio gebunden.</p>
+      </div>
+      <div class="card">
+        <h3>Tertiär — Anwohner &amp; Berufstätige</h3>
+        <p>Stressabbau nach der Arbeit, gesundheitsorientiertes Training und der Spa-Bereich als Zusatznutzen.</p>
+      </div>
+      <div class="card">
+        <h3>Warum der Name</h3>
+        <p>„Motion Gym" ist bewusst an der Jugendsprache orientiert — der Name selbst ist Teil der Ansprache der Hauptzielgruppe.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="swot">
+    <h2>SWOT-Analyse</h2>
+    <div class="swot">
+      <div class="card">
+        <h3>Stärken</h3>
+        <ul>
+          <li>Durchgehende Öffnung — maximale Flexibilität</li>
+          <li>Kursangebot wie Yoga und Kraftkurse</li>
+          <li>Moderne Geräte, digitales Zugangssystem</li>
+          <li>Standort direkt an der Zielgruppe</li>
+        </ul>
+      </div>
+      <div class="card neg">
+        <h3>Schwächen</h3>
+        <ul>
+          <li>Hohe Anfangsinvestition für Geräte und Technik</li>
+          <li>Laufende Kosten für Miete und Strom</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Chancen</h3>
+        <ul>
+          <li>Wachsender Fitness- und Gesundheitstrend</li>
+          <li>Kooperationen mit Firmen und Ärzten</li>
+          <li>Zusatzangebote wie Online-Kurse</li>
+        </ul>
+      </div>
+      <div class="card neg">
+        <h3>Risiken</h3>
+        <ul>
+          <li>Starke Konkurrenz und Preisdruck</li>
+          <li>Diebstahl und Vandalismus im unbesetzten Betrieb</li>
+          <li>Gesetzliche Vorschriften und Auflagen</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="organisation">
+    <h2>Organisation</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Zutritt</h3>
+        <p>Mitglieder erhalten ein Armband mit Transponder — Studiozutritt und Spindschlüssel in einem. Später folgt eine App, die beides ersetzt.</p>
+      </div>
+      <div class="card">
+        <h3>Hygiene &amp; Abläufe</h3>
+        <p>Der Spa-Bereich wird täglich zu festen Zeiten gereinigt und regelmäßig kontrolliert. Mitgliedschaften und Kursplanung laufen automatisiert über eine interne Website.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="team">
+    <h2>Gründerteam</h2>
+    <div class="team">
+      <div class="member"><b>Max Horschitz</b><span>Geschäftsführung &amp; Social Media</span></div>
+      <div class="member"><b>Levi Kirr</b><span>Social Media &amp; Buchhaltung</span></div>
+      <div class="member"><b>Tom Hagner</b><span>Personal Coach, Trainingspläne</span></div>
+      <div class="member"><b>Jasper Jung</b><span>Trainer, Kursangebot</span></div>
+      <div class="member"><b>Tim Nickel</b><span>Rezeption, Sauberkeit</span></div>
+    </div>
+  </section>
+
+  <section id="marketing">
+    <h2>Marketing</h2>
+    <p>Das Budget geht dorthin, wo die Zielgruppe ist: Instagram, TikTok und YouTube. Reels und Clips werden im eigenen Studio gedreht und erreichen die Jugendlichen der Umgebung direkt.</p>
+    <p>Dazu kommt die stärkste Werbung überhaupt — Mitglieder, die ihre Fortschritte selbst teilen. Authentisch und kostenlos. Auf teure Streuwerbung wie Fernsehen wird bewusst verzichtet; das Geld fließt stattdessen in die Qualität des Studios.</p>
+  </section>
+
+  <section id="preise">
+    <h2>Preise</h2>
+    <div class="plans">
+      <div class="plan">
+        <h4>Basic</h4>
+        <div class="price">29 €<small> / Monat</small></div>
+        <ul>
+          <li>Zutritt rund um die Uhr</li>
+          <li>Komplette Trainingsfläche</li>
+          <li>Ohne Kurse und Spa</li>
+        </ul>
+      </div>
+      <div class="plan premium">
+        <h4>Premium</h4>
+        <div class="price">49 €<small> / Monat</small></div>
+        <ul>
+          <li>Alles aus Basic</li>
+          <li>Spa- und Wellnessbereich</li>
+          <li>Alle Kurse inklusive</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="finanzierung">
+    <h2>Finanzierung</h2>
+    <p>Geschätzter Kapitalbedarf, um den Betrieb aufzunehmen.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Kostenpunkt</th><th scope="col">Betrag</th><th scope="col">Wofür</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Geräte<div class="bar" style="width:100%"></div></td>
+            <td class="num">180.000 €</td>
+            <td>Kraft- und Cardio-Geräte, Freihantelbereich</td>
+          </tr>
+          <tr>
+            <td>Wellness &amp; Spa<div class="bar" style="width:67%"></div></td>
+            <td class="num">120.000 €</td>
+            <td>Sauna, Lüftungs- und Klimatechnik</td>
+          </tr>
+          <tr>
+            <td>Innenausstattung<div class="bar" style="width:44%"></div></td>
+            <td class="num">80.000 €</td>
+            <td>Bodenbeläge, Umkleiden, Duschen, Beleuchtung</td>
+          </tr>
+          <tr>
+            <td>Sicherheit<div class="bar" style="width:17%"></div></td>
+            <td class="num">30.000 €</td>
+            <td>Videoüberwachung, WLAN</td>
+          </tr>
+          <tr>
+            <td>Miete<div class="bar" style="width:14%"></div></td>
+            <td class="num">25.000 €</td>
+            <td>Fläche auf dem Toom-Gelände</td>
+          </tr>
+          <tr>
+            <td>Puffer<div class="bar" style="width:28%"></div></td>
+            <td class="num">50.000 €</td>
+            <td>Notfälle, Strom, Versicherung</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Gesamt</td><td class="num">485.000 €</td><td class="muted">Schätzung</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section id="zukunft">
+    <h2>Zukunft</h2>
+    <ul class="timeline">
+      <li>
+        <b>Jahr 1</b>
+        In Herborn bekannt werden, 300 bis 500 Mitglieder gewinnen, 3 bis 5 Kurse pro Woche anbieten — etwa Yoga oder Functional Training.
+      </li>
+      <li>
+        <b>Jahr 2–3</b>
+        Eigene App: Trainingspläne einsehen, Kurse buchen, per Handy ins Studio. Am Eingang gesunde Snacks und Proteinshakes.
+      </li>
+      <li>
+        <b>Ziel</b>
+        Das beste 24/7-Fitnessstudio der Region sein.
+      </li>
+    </ul>
+  </section>
+
+  <section id="recht">
+    <h2>Recht &amp; Sicherheit</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Haftung</h3>
+        <p>Rechtsform GmbH — die Haftung bleibt auf das Gesellschaftsvermögen beschränkt, das Privatvermögen ist geschützt. Mitglieder unterschreiben, dass sie auf eigene Gefahr trainieren.</p>
+      </div>
+      <div class="card">
+        <h3>Im Studio</h3>
+        <p>Kameras in den öffentlichen Bereichen, ausdrücklich nicht in den Umkleiden. Notfallknöpfe auf der Fläche.</p>
+      </div>
+      <div class="card">
+        <h3>Verträge &amp; Daten</h3>
+        <p>Klare AGB, unter anderem zum Zutritt bei ausbleibender Zahlung. Mitgliederdaten werden sicher und datenschutzkonform gespeichert.</p>
+      </div>
+      <div class="card">
+        <h3>Behörden</h3>
+        <p>Anmeldung beim Gesundheitsamt wegen der Vorschriften zu Hygiene und Belüftung.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  Businessplan Motion Gym &middot; Jasper, Tom, Max, Levi und Tim &middot; Wöchentliche Teambesprechung, klare Aufgabenverteilung
+</footer>
