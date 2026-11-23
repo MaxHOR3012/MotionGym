@@ -20,3 +20,7 @@ Beide Dateien sind eigenständig: kein Build, kein Server, keine externen Bilder
 ## iOS-Feature „Einnahmen"
 
 Unter `iOS/Einnahmen/` liegt ein eigenständiges SwiftUI-Modul (iOS 17+) für ein privates Geld-Portfolio. Wie man es in Xcode einbindet, steht in `iOS/Einnahmen/README.md`.
+
+## iPhone-Widget „Einnahmen“ (ohne Mac)
+
+`scriptable/Einnahmen.js` ist ein Skript für die kostenlose App Scriptable: Widget für den Home-Bildschirm plus Mini-App zum Erfassen. Anleitung in `scriptable/README.md`.
