@@ -16,3 +16,7 @@ Beide Dateien sind eigenständig: kein Build, kein Server, keine externen Bilder
 5. Nach ein bis zwei Minuten ist die Seite erreichbar unter
    `https://DEIN-BENUTZERNAME.github.io/motion-gym/`
    Das Rad liegt dann unter `.../motion-gym/rad.html`.
+
+## iOS-Feature „Einnahmen"
+
+Unter `iOS/Einnahmen/` liegt ein eigenständiges SwiftUI-Modul (iOS 17+) für ein privates Geld-Portfolio. Wie man es in Xcode einbindet, steht in `iOS/Einnahmen/README.md`.
