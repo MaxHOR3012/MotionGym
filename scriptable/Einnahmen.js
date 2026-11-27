@@ -1274,7 +1274,7 @@ function donut(slices) {
   s += '<circle cx="100" cy="100" r="' + R + '" fill="none" stroke="var(--track)" stroke-width="' + sw + '"/>';
   slices.forEach(sl => {
     const len = Math.max(sl.share * C - (slices.length > 1 ? 2 : 0), 0.5);
-    s += '<circle cx="100" cy="100" r="' + R + '" fill="none" stroke="' + SOURCES[sl.source].color + '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 100 100)"/>';
+    s += '<circle cx="100" cy="100" r="' + R + '" fill="none" stroke="' + (SOURCES[sl.source] || SOURCES.other).color + '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 100 100)"/>';
     off += sl.share * C;
   });
   const total = slices.reduce((a, b) => a + b.cents, 0);
@@ -1334,7 +1334,7 @@ function render() {
   if (!slices.length) h += '<div class="empty">Keine Einnahmen in diesem Zeitraum</div>';
   else {
     h += donut(slices) + '<div class="legend" style="margin-top:10px">' + slices.map(sl =>
-      '<div><span class="dot" style="background:' + SOURCES[sl.source].color + '"></span>' + esc(SOURCES[sl.source].title) +
+      '<div><span class="dot" style="background:' + (SOURCES[sl.source] || SOURCES.other).color + '"></span>' + esc((SOURCES[sl.source] || SOURCES.other).title) +
       '<span class="p">' + fmtPercent(sl.share) + '</span><span class="a">' + esc(money(sl.cents)) + '</span></div>').join('') + '</div>';
   }
   h += '</div>';
