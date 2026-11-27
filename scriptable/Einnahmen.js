@@ -27,6 +27,7 @@ const MASK = "•••• €";
 
 const SOURCES = {
   salary:   { title: "Gehalt",        emoji: "💼", color: "#0A84FF" },
+  project:  { title: "Aufträge",      emoji: "🤝", color: "#5E5CE6" },
   dividend: { title: "Dividende",     emoji: "📈", color: "#30D158" },
   interest: { title: "Zinsen",        emoji: "🏦", color: "#40C8E0" },
   rent:     { title: "Mieteinnahmen", emoji: "🏠", color: "#FF9F0A" },

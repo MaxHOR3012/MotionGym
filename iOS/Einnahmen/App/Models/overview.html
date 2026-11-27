@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Einnahmen</title>
+<style>
+:root{--bg:#F2F2F7;--card:#FFFFFF;--text:#000;--sec:#6C6C70;--ter:#C7C7CC;--sep:rgba(60,60,67,.18);--accent:#0A84FF;--green:#248A3D;--red:#D70015;--track:rgba(120,120,128,.18)}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1C1C1E;--text:#FFF;--sec:#98989F;--ter:#48484A;--sep:rgba(84,84,88,.6);--green:#30D158;--red:#FF453A;--track:rgba(120,120,128,.32)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 28px)}
+h1{font-size:32px;font-weight:700;margin:4px 0 2px;letter-spacing:-.02em}
+.sub{color:var(--sec);font-size:15px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.eye{border:0;background:var(--card);color:var(--accent);font-size:14px;font-weight:600;border-radius:99px;padding:6px 12px}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px}
+.label{color:var(--sec);font-size:14px;font-weight:500}
+.hero .amount{font:700 38px/1.1 ui-rounded,-apple-system,sans-serif;margin:6px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.muted{color:var(--sec);font-size:13px}
+.badge{display:inline-block;margin-top:8px;font-size:13px;font-weight:600}
+.up{color:var(--green)}.down{color:var(--red)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border-radius:14px;padding:12px 10px}
+.tile .v{font:600 16px ui-rounded,-apple-system,sans-serif;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2{font-size:17px;font-weight:600;margin:0}
+.bar{height:10px;border-radius:99px;background:var(--track);overflow:hidden;margin:12px 0 8px}
+.bar>div{height:100%;border-radius:99px;background:var(--accent)}
+.bar.done>div{background:var(--green)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.seg{display:flex;background:var(--track);border-radius:9px;padding:2px;margin:12px 0}
+.seg button{flex:1;border:0;background:transparent;color:var(--text);font-size:13px;font-weight:500;padding:6px 0;border-radius:7px}
+.seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.15);font-weight:600}
+.legend div{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:15px}
+.legend .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.legend .p{color:var(--sec);margin-left:auto;font-variant-numeric:tabular-nums}
+.legend .a{min-width:92px;text-align:right;font-variant-numeric:tabular-nums}
+.item{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:.5px solid var(--sep)}
+.item:first-of-type{border-top:0}
+.ico{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;flex:none}
+.item .t{flex:1;min-width:0}
+.item .t div:last-child{color:var(--sec);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .v{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item.pl .v{color:var(--sec)}
+.empty{color:var(--sec);text-align:center;padding:24px 0}
+.foot{color:var(--sec);font-size:12px;text-align:center;margin-top:18px}
+.sel{font-size:13px;color:var(--sec);text-align:right}
+.sel b{display:block;color:var(--text);font-size:15px}
+</style>
+</head>
+<body>
+<h1>Einnahmen</h1>
+<div class="sub"><span id="month"></span><button class="eye" id="eye"></button></div>
+<div id="app"></div>
+<div class="foot">Gespeichert in deiner iCloud bzw. auf diesem iPhone · keine Server, keine Tracker</div>
+<script>
+const SOURCES = {"salary":{"title":"Gehalt","emoji":"💼","color":"#0A84FF"},"project":{"title":"Aufträge","emoji":"🤝","color":"#5E5CE6"},"dividend":{"title":"Dividende","emoji":"📈","color":"#30D158"},"interest":{"title":"Zinsen","emoji":"🏦","color":"#40C8E0"},"rent":{"title":"Mieteinnahmen","emoji":"🏠","color":"#FF9F0A"},"sale":{"title":"Verkauf","emoji":"🛒","color":"#BF5AF2"},"other":{"title":"Sonstiges","emoji":"✨","color":"#8E8E93"}};
+const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const MONTHS_SHORT = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+const MASK = "•••• €";
+function pad(n) { return String(n).padStart(2, "0"); }
+function parseYmd(s) {
+  const [y, m, d] = s.split("-").map(Number);
+  return { y, m, d };
+}
+function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+function addMonths(s, n) {
+  const { y, m, d } = parseYmd(s);
+  const t = (m - 1) + n;
+  const ny = y + Math.floor(t / 12);
+  const nm = ((t % 12) + 12) % 12 + 1;
+  return `${ny}-${pad(nm)}-${pad(Math.min(d, daysInMonth(ny, nm)))}`;
+}
+function monthKey(s) { return s.slice(0, 7); }
+function addMonthsKey(key, n) { return addMonths(key + "-01", n).slice(0, 7); }
+function monthLabel(key, style) {
+  const [y, m] = key.split("-").map(Number);
+  if (style === "short") return MONTHS_SHORT[m - 1];
+  if (style === "month") return MONTHS[m - 1];
+  return `${MONTHS[m - 1]} ${y}`;
+}
+function fmtDate(s) {
+  const { y, m, d } = parseYmd(s);
+  return `${pad(d)}.${pad(m)}.${y}`;
+}
+function fmtEuro(cents, decimals) {
+  const withDecimals = decimals !== false;
+  const negative = cents < 0;
+  const abs = Math.abs(Math.round(cents));
+  const euros = withDecimals ? Math.floor(abs / 100) : Math.round(abs / 100);
+  const intStr = String(euros).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const dec = withDecimals ? "," + pad(abs % 100) : "";
+  return (negative ? "−" : "") + intStr + dec + " €";
+}
+function fmtPercent(x, signed) {
+  const v = Math.round(x * 100);
+  return (signed && v > 0 ? "+" : "") + String(v).replace("-", "−") + " %";
+}
+function trend(change) {
+  const v = Math.round(change * 100);
+  return v > 0 ? 1 : v < 0 ? -1 : 0;
+}
+function trendArrow(change) {
+  return ["▼", "●", "▲"][trend(change) + 1];
+}
+function computeStats(incomes, today, pastMonths, futureMonths) {
+  const past = pastMonths || 12;
+  const future = futureMonths === undefined ? 3 : futureMonths;
+  const thisKey = monthKey(today);
+  const prevKey = addMonthsKey(thisKey, -1);
+  const year = today.slice(0, 4);
+
+  const byMonth = {};
+  for (const i of incomes) {
+    const k = monthKey(i.date);
+    const b = byMonth[k] || (byMonth[k] = { received: 0, planned: 0 });
+    if (i.planned) b.planned += i.cents; else b.received += i.cents;
+  }
+  const total = (k) => (byMonth[k] ? byMonth[k].received + byMonth[k].planned : 0);
+
+  const current = total(thisKey);
+  const currentPlanned = byMonth[thisKey] ? byMonth[thisKey].planned : 0;
+  const previous = total(prevKey);
+  const change = previous > 0 ? (current - previous) / previous : null;
+
+  let yearTotal = 0;
+  let firstMonth = null;
+  for (const k of Object.keys(byMonth)) {
+    if (k.slice(0, 4) === year && k <= thisKey) {
+      yearTotal += total(k);
+      if (total(k) > 0 && (!firstMonth || k < firstMonth)) firstMonth = k;
+    }
+  }
+  const thisMonthNo = Number(thisKey.slice(5));
+  const elapsed = firstMonth ? thisMonthNo - Number(firstMonth.slice(5)) + 1 : thisMonthNo;
+  const average = Math.round(yearTotal / Math.max(elapsed, 1));
+
+  const buckets = [];
+  for (let o = -(past - 1); o <= future; o++) {
+    const k = addMonthsKey(thisKey, o);
+    const b = byMonth[k] || { received: 0, planned: 0 };
+    buckets.push({ key: k, received: b.received, planned: b.planned, isCurrent: o === 0, isFuture: o > 0 });
+  }
+
+  return { thisKey, prevKey, year, current, currentPlanned, previous, change, yearTotal, average, buckets };
+}
+function sourceSlices(incomes, today, period) {
+  const thisKey = monthKey(today);
+  let from = thisKey;
+  if (period === "year") from = today.slice(0, 4) + "-01";
+  if (period === "last12") from = addMonthsKey(thisKey, -11);
+
+  const totals = {};
+  for (const i of incomes) {
+    const k = monthKey(i.date);
+    if (k >= from && k <= thisKey) totals[i.source] = (totals[i.source] || 0) + i.cents;
+  }
+  const sum = Object.values(totals).reduce((a, b) => a + b, 0);
+  if (!sum) return [];
+  return Object.keys(totals)
+    .filter((s) => totals[s] > 0)
+    .map((s) => ({ source: s, cents: totals[s], share: totals[s] / sum }))
+    .sort((a, b) => b.cents - a.cents);
+}
+const D = {"incomes":[{"cents":69000,"source":"dividend","date":"2026-04-12","note":"Dividende Hauptversammlung","planned":false,"recurring":false,"positionId":"id-sqo2uhprqbamwz6dw9s"},{"cents":120000,"source":"sale","date":"2026-07-20","note":"E-Bike verkauft","planned":false,"recurring":false,"positionId":null},{"cents":210000,"source":"salary","date":"2026-06-27","note":"Urlaubsgeld","planned":false,"recurring":false,"positionId":null},{"cents":48000,"source":"other","date":"2026-09-09","note":"Steuererstattung","planned":false,"recurring":false,"positionId":null},{"cents":8500,"source":"sale","date":"2026-10-14","note":"Kleinanzeigen","planned":false,"recurring":false,"positionId":null},{"cents":325000,"source":"salary","date":"2025-10-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2025-11-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2025-12-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-01-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-02-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-03-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-04-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-05-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-06-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-07-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-08-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-09-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-10-27","note":"Nettogehalt","planned":false,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-11-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2026-12-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-01-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-02-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-03-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-04-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-05-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-06-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-07-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-08-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-09-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":325000,"source":"salary","date":"2027-10-27","note":"Nettogehalt","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2025-10-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2025-11-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2025-12-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-01-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-02-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-03-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-04-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-05-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-06-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-07-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-08-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-09-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-10-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-11-03","note":"Wohnung Lindenstraße","planned":false,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2026-12-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-01-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-02-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-03-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-04-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-05-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-06-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-07-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-08-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-09-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-10-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":65000,"source":"rent","date":"2027-11-03","note":"Wohnung Lindenstraße","planned":true,"recurring":true,"positionId":null},{"cents":8430,"source":"dividend","date":"2025-11-15","note":"Quartalsausschüttung","planned":false,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2026-02-15","note":"Quartalsausschüttung","planned":false,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2026-05-15","note":"Quartalsausschüttung","planned":false,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2026-08-15","note":"Quartalsausschüttung","planned":false,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2026-11-15","note":"Quartalsausschüttung","planned":false,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2027-02-15","note":"Quartalsausschüttung","planned":true,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2027-05-15","note":"Quartalsausschüttung","planned":true,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2027-08-15","note":"Quartalsausschüttung","planned":true,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":8430,"source":"dividend","date":"2027-11-15","note":"Quartalsausschüttung","planned":true,"recurring":true,"positionId":"id-70e49a77v5gmwz6dw9s"},{"cents":4120,"source":"interest","date":"2025-10-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2025-11-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2025-12-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-01-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-02-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-03-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-04-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-05-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-06-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-07-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-08-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-09-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-10-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-11-01","note":"Zinsgutschrift","planned":false,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2026-12-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-01-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-02-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-03-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-04-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-05-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-06-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-07-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-08-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-09-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-10-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"},{"cents":4120,"source":"interest","date":"2027-11-01","note":"Zinsgutschrift","planned":true,"recurring":true,"positionId":"id-6reh5cfob74mwz6dw9s"}],"positions":[{"id":"id-70e49a77v5gmwz6dw9s","name":"MSCI World ETF","kind":"etf"},{"id":"id-sqo2uhprqbamwz6dw9s","name":"Allianz SE","kind":"stock"},{"id":"id-6reh5cfob74mwz6dw9s","name":"Tagesgeld","kind":"savings"}],"settings":{"goalCents":450000,"hideAmounts":false},"today":"2026-11-23"};
+let hide = !!D.settings.hideAmounts;
+let period = "year";
+let selected = null;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = (c, d) => hide ? MASK : fmtEuro(c, d);
+
+function barChart(st, goal) {
+  const W = 340, H = 170, top = 14, bottom = 20, chartH = H - top - bottom;
+  const n = st.buckets.length, gap = 6, bw = (W - gap * (n - 1)) / n;
+  const max = Math.max(1, goal, ...st.buckets.map(b => b.received + b.planned));
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Einnahmen pro Monat">';
+  st.buckets.forEach((b, i) => {
+    const x = i * (bw + gap), tot = b.received + b.planned;
+    const th = tot / max * chartH, rh = b.received / max * chartH;
+    const dim = selected !== null && selected !== i ? ' opacity=".35"' : '';
+    s += '<g data-i="' + i + '"' + dim + '>';
+    s += '<rect x="' + x + '" y="' + top + '" width="' + bw + '" height="' + chartH + '" fill="transparent"/>';
+    if (tot > 0) {
+      s += '<rect x="' + x + '" y="' + (top + chartH - th) + '" width="' + bw + '" height="' + th + '" rx="4" fill="var(--accent)" fill-opacity=".3"/>';
+      if (rh > 0) s += '<rect x="' + x + '" y="' + (top + chartH - rh) + '" width="' + bw + '" height="' + rh + '" rx="4" fill="var(--accent)"' + (b.isCurrent ? '' : ' fill-opacity=".8"') + '/>';
+    } else {
+      s += '<rect x="' + x + '" y="' + (top + chartH - 2) + '" width="' + bw + '" height="2" rx="1" fill="var(--track)"/>';
+    }
+    s += '<text x="' + (x + bw / 2) + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="var(--sec)"' + (b.isCurrent ? ' font-weight="700"' : '') + '>' + monthLabel(b.key, "short").charAt(0) + '</text></g>';
+  });
+  if (goal > 0) {
+    const y = top + chartH - goal / max * chartH;
+    s += '<line x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '" stroke="var(--green)" stroke-dasharray="5 4"/>';
+    s += '<text x="0" y="' + (y - 4) + '" font-size="10" font-weight="600" fill="var(--green)">Ziel</text>';
+  }
+  return s + '</svg>';
+}
+
+function donut(slices) {
+  const R = 70, C = 2 * Math.PI * R, sw = 26;
+  let off = 0, s = '<svg viewBox="0 0 200 200" style="max-width:220px;margin:0 auto">';
+  s += '<circle cx="100" cy="100" r="' + R + '" fill="none" stroke="var(--track)" stroke-width="' + sw + '"/>';
+  slices.forEach(sl => {
+    const len = Math.max(sl.share * C - (slices.length > 1 ? 2 : 0), 0.5);
+    s += '<circle cx="100" cy="100" r="' + R + '" fill="none" stroke="' + SOURCES[sl.source].color + '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 100 100)"/>';
+    off += sl.share * C;
+  });
+  const total = slices.reduce((a, b) => a + b.cents, 0);
+  s += '<text x="100" y="94" text-anchor="middle" font-size="12" fill="var(--sec)">Gesamt</text>';
+  s += '<text x="100" y="116" text-anchor="middle" font-size="18" font-weight="700" fill="var(--text)">' + esc(money(total, false)) + '</text>';
+  return s + '</svg>';
+}
+
+function item(i) {
+  const src = SOURCES[i.source] || SOURCES.other;
+  const pos = D.positions.find(p => p.id === i.positionId);
+  const sub = [fmtDate(i.date), pos ? pos.name : "", i.note].filter(Boolean).join(" · ");
+  return '<div class="item' + (i.planned ? ' pl' : '') + '"><div class="ico" style="background:' + src.color + '26">' + src.emoji + '</div>' +
+    '<div class="t"><div>' + esc(src.title) + (i.recurring ? ' <span class="muted">↻</span>' : '') + '</div><div>' + esc(sub) + '</div></div>' +
+    '<div class="v">' + esc(money(i.cents)) + '</div></div>';
+}
+
+function render() {
+  const st = computeStats(D.incomes, D.today);
+  const goal = D.settings.goalCents || 0;
+  const prog = goal ? st.current / goal : 0;
+  document.getElementById("month").textContent = monthLabel(st.thisKey);
+  document.getElementById("eye").textContent = hide ? "Beträge zeigen" : "Beträge ausblenden";
+
+  let h = '';
+  h += '<div class="card hero" id="hero"><div class="row"><span class="label">Diesen Monat</span><span class="muted">antippen zum Ausblenden</span></div>';
+  h += '<div class="amount">' + esc(money(st.current)) + '</div>';
+  if (st.currentPlanned) h += '<div class="muted">davon ' + esc(money(st.currentPlanned)) + ' noch erwartet</div>';
+  h += st.change === null ? '<div class="badge muted">Kein Vergleich zum Vormonat möglich</div>'
+    : '<div class="badge ' + ['down', 'muted', 'up'][trend(st.change) + 1] + '">' + trendArrow(st.change) + ' ' + fmtPercent(st.change, true) + ' <span class="muted">ggü. Vormonat</span></div>';
+  h += '</div>';
+
+  h += '<div class="tiles">' +
+    '<div class="tile"><div class="label">Vormonat</div><div class="v">' + esc(money(st.previous, false)) + '</div></div>' +
+    '<div class="tile"><div class="label">Jahr ' + st.year + '</div><div class="v">' + esc(money(st.yearTotal, false)) + '</div></div>' +
+    '<div class="tile"><div class="label">Ø / Monat</div><div class="v">' + esc(money(st.average, false)) + '</div></div></div>';
+
+  h += '<div class="card"><div class="row"><h2>🎯 Monatsziel</h2><span class="label">' + (goal ? fmtPercent(prog) : '') + '</span></div>';
+  if (goal) {
+    h += '<div class="bar' + (prog >= 1 ? ' done' : '') + '"><div style="width:' + Math.min(prog, 1) * 100 + '%"></div></div>';
+    h += '<div class="row muted"><span>' + esc(money(st.current, false)) + ' von ' + esc(money(goal, false)) + '</span><span>' +
+      (prog >= 1 ? 'Erreicht 🎉' : 'fehlen ' + esc(money(goal - st.current, false))) + '</span></div>';
+  } else {
+    h += '<div class="muted" style="margin-top:8px">Im Menü unter Einstellungen › Monatsziel festlegen.</div>';
+  }
+  h += '</div>';
+
+  const sel = selected !== null ? st.buckets[selected] : null;
+  h += '<div class="card"><div class="row"><h2>Pro Monat</h2><div class="sel">' +
+    (sel ? monthLabel(sel.key) + '<b>' + esc(money(sel.received + sel.planned)) + '</b>' : 'Balken antippen') + '</div></div>' +
+    '<div id="bars" style="margin-top:10px">' + barChart(st, goal) + '</div>' +
+    '<div class="muted" style="margin-top:8px"><span style="color:var(--accent)">■</span> eingegangen &nbsp; <span style="color:var(--accent);opacity:.35">■</span> erwartet</div></div>';
+
+  const slices = sourceSlices(D.incomes, D.today, period);
+  h += '<div class="card"><h2>Nach Quelle</h2><div class="seg">' +
+    [["month","Monat"],["year","Jahr"],["last12","12 Monate"]].map(p => '<button data-p="' + p[0] + '" class="' + (period === p[0] ? 'on' : '') + '">' + p[1] + '</button>').join('') + '</div>';
+  if (!slices.length) h += '<div class="empty">Keine Einnahmen in diesem Zeitraum</div>';
+  else {
+    h += donut(slices) + '<div class="legend" style="margin-top:10px">' + slices.map(sl =>
+      '<div><span class="dot" style="background:' + SOURCES[sl.source].color + '"></span>' + esc(SOURCES[sl.source].title) +
+      '<span class="p">' + fmtPercent(sl.share) + '</span><span class="a">' + esc(money(sl.cents)) + '</span></div>').join('') + '</div>';
+  }
+  h += '</div>';
+
+  const upcoming = D.incomes.filter(i => i.planned).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
+  const recent = D.incomes.filter(i => !i.planned).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+  if (upcoming.length) h += '<div class="card"><h2>Demnächst erwartet</h2><div style="margin-top:6px">' + upcoming.map(item).join('') + '</div></div>';
+  h += '<div class="card"><h2>Zuletzt eingegangen</h2><div style="margin-top:6px">' +
+    (recent.length ? recent.map(item).join('') : '<div class="empty">Noch keine Einnahmen</div>') + '</div></div>';
+
+  document.getElementById("app").innerHTML = h;
+
+  document.getElementById("hero").onclick = () => { hide = !hide; render(); };
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { period = b.dataset.p; render(); });
+  document.querySelectorAll("#bars g").forEach(g => g.onclick = () => {
+    const i = Number(g.dataset.i); selected = selected === i ? null : i; render();
+  });
+}
+document.getElementById("eye").onclick = () => { hide = !hide; render(); };
+render();
+</script>
+</body>
+</html>

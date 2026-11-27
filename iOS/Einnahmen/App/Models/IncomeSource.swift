@@ -3,6 +3,7 @@ import SwiftUI
 /// Herkunft einer Einnahme.
 enum IncomeSource: String, CaseIterable, Identifiable, Codable {
     case salary
+    case project
     case dividend
     case interest
     case rent
@@ -14,6 +15,7 @@ enum IncomeSource: String, CaseIterable, Identifiable, Codable {
     var title: String {
         switch self {
         case .salary: "Gehalt"
+        case .project: "Aufträge"
         case .dividend: "Dividende"
         case .interest: "Zinsen"
         case .rent: "Mieteinnahmen"
@@ -25,6 +27,7 @@ enum IncomeSource: String, CaseIterable, Identifiable, Codable {
     var symbol: String {
         switch self {
         case .salary: "briefcase.fill"
+        case .project: "person.2.fill"
         case .dividend: "chart.line.uptrend.xyaxis"
         case .interest: "percent"
         case .rent: "house.fill"
@@ -37,6 +40,7 @@ enum IncomeSource: String, CaseIterable, Identifiable, Codable {
     var color: Color {
         switch self {
         case .salary: .blue
+        case .project: .indigo
         case .dividend: .green
         case .interest: .teal
         case .rent: .orange
